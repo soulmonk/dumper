@@ -3,22 +3,28 @@ package rest
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
+	sloggin "github.com/samber/slog-gin"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
-	"soulmonk/dumper/pkg/rest/middleware"
 	"time"
 )
 
 func setupRouter() *gin.Engine {
-	r := gin.Default()
+	r := gin.New()
+	// Add the sloggin middleware to all routes.
+	// The middleware will log all requests attributes.
+	r.Use(sloggin.New(slog.Default()))
+	r.Use(gin.Recovery())
 
 	r.GET("/ping", ping)
+	//r.GET("/ideas", getIdeas)
+	//r.POST("/ideas", createIdea)
+	//r.GET("/ideas/:id", getIdea)
 	return r
 }
 
-// RunServer runs HTTP/REST gateway
 func RunServer(ctx context.Context, httpPort string) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -26,15 +32,10 @@ func RunServer(ctx context.Context, httpPort string) error {
 	r := setupRouter()
 
 	addr := httpPort
-	log.Debug().Str("listen on", addr).Send()
-	//if err := http.ListenAndServe(addr, r); err != nil {
-	//	log.Fatal(err)
-	//}
-
+	slog.Debug("listen on", "addr", addr)
 	srv := &http.Server{
-		Addr: ":" + httpPort,
-		Handler: middleware.AddRequestID(
-			middleware.AddLogger(r)),
+		Addr:    ":" + httpPort,
+		Handler: r,
 	}
 
 	// graceful shutdown
@@ -43,7 +44,7 @@ func RunServer(ctx context.Context, httpPort string) error {
 	go func() {
 		for range c {
 			// sig is a ^C, handle it
-			log.Warn().Msg("shutting down HTTP/REST gateway...")
+			slog.Warn("shutting down HTTP/REST gateway...")
 			_, cancel := context.WithTimeout(ctx, 5*time.Second)
 			defer cancel()
 
@@ -53,7 +54,7 @@ func RunServer(ctx context.Context, httpPort string) error {
 
 	}()
 
-	log.Info().Msg("starting HTTP/REST gateway...")
+	slog.Info("starting HTTP/REST gateway...")
 	return srv.ListenAndServe()
 }
 
@@ -61,7 +62,6 @@ type pingResponse struct {
 	Status string `bson:"status" json:"status"`
 }
 
-// getAlbums responds with the list of all albums as JSON.
 func ping(c *gin.Context) {
 	var data = pingResponse{"ok"}
 	c.IndentedJSON(http.StatusOK, data)
