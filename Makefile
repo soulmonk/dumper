@@ -15,6 +15,6 @@ gen-db: ## Generate go from sql
 	@echo "Generate"
 	@sqlc generate
 
-build-server: ## Build grpc-server
+build: ## Build server
 	@echo "  >  Build server"
 	go build -o $(PROJ_BUILD_PATH)/server $(PROJ_BASE)/cmd/server.go

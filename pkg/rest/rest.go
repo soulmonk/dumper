@@ -2,23 +2,28 @@ package rest
 
 import (
 	"context"
-	"encoding/json"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
 	"os/signal"
-	middleware2 "soulmonk/dumper/pkg/rest/middleware"
+	"soulmonk/dumper/pkg/rest/middleware"
 	"time"
 )
+
+func setupRouter() *gin.Engine {
+	r := gin.Default()
+
+	r.GET("/ping", ping)
+	return r
+}
 
 // RunServer runs HTTP/REST gateway
 func RunServer(ctx context.Context, httpPort string) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	r := mux.NewRouter()
 
-	r.HandleFunc("/ping", status).Methods("GET")
+	r := setupRouter()
 
 	addr := httpPort
 	log.Debug().Str("listen on", addr).Send()
@@ -28,8 +33,8 @@ func RunServer(ctx context.Context, httpPort string) error {
 
 	srv := &http.Server{
 		Addr: ":" + httpPort,
-		Handler: middleware2.AddRequestID(
-			middleware2.AddLogger(r)),
+		Handler: middleware.AddRequestID(
+			middleware.AddLogger(r)),
 	}
 
 	// graceful shutdown
@@ -52,24 +57,12 @@ func RunServer(ctx context.Context, httpPort string) error {
 	return srv.ListenAndServe()
 }
 
-type statusResponse struct {
+type pingResponse struct {
 	Status string `bson:"status" json:"status"`
 }
 
-func status(w http.ResponseWriter, r *http.Request) {
-	var data = statusResponse{"ok"}
-	RespondWithJson(w, http.StatusOK, data)
-}
-
-func RespondWithError(w http.ResponseWriter, code int, msg string) {
-	RespondWithJson(w, code, map[string]string{"error": msg})
-}
-
-func RespondWithJson(w http.ResponseWriter, code int, payload any) {
-	response, _ := json.Marshal(payload)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	if _, err := w.Write(response); err != nil {
-		log.Fatal().Err(err)
-	}
+// getAlbums responds with the list of all albums as JSON.
+func ping(c *gin.Context) {
+	var data = pingResponse{"ok"}
+	c.IndentedJSON(http.StatusOK, data)
 }
