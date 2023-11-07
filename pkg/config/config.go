@@ -29,12 +29,12 @@ func Load() *Config {
 	// if no file it's okay
 	_ = godotenv.Load(".env")
 
-	logLevel, _ := strconv.Atoi(getEnv("LOG_LEVEL", "-1"))
+	logLevel, _ := strconv.Atoi(getEnv("LOG_LEVEL", "-4"))
 	config = Config{
 		HTTPPort:                   getEnv("HTTP_PORT", "51101"),
 		LogLevel:                   logLevel,
 		LogTimeFormat:              getEnv("LOG_TIME_FORMAT", "2006-01-02T15:04:05.999999999Z07:00"),
-		PostgresqlConnectionString: getEnv("POSTGRESQL_CONNECTION_STRING", "postgres://cuppa:password@localhost:5432/cuppa-authentication?sslmode=disable"),
+		PostgresqlConnectionString: getEnv("POSTGRESQL_CONNECTION_STRING", ""),
 	}
 
 	return Get()
