@@ -5,7 +5,8 @@ include $(SELF_DIR)/cuppa-tools/Makefile.common.mk
 PROJ_BUILD_PATH := $(PROJ_BASE)/build
 
 test:
-	echo ${PROJ_BASE}
+	@echo "Run tests"
+	go test ./...
 
 migration:
 	@echo "Migration"

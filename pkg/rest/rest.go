@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"soulmonk/dumper/pkg/db"
+	"soulmonk/dumper/pkg/db/ideas"
 	"time"
 )
 
@@ -27,12 +28,25 @@ func setupRouter(dao *db.Dao) *gin.Engine {
 
 func getGetIdeasHandler(dao *db.Dao) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
+		result, err := dao.IdeasQuerier.ListIdeas(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		c.JSON(200, result)
 	}
 }
 func getCreateIdeaHandler(dao *db.Dao) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var idea ideas.CreateIdeaParams
+		if err := c.Bind(&idea); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 
+		result, err := dao.IdeasQuerier.CreateIdea(c, idea)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		c.JSON(200, result)
 	}
 }
 

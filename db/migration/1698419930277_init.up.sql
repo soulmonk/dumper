@@ -1,7 +1,8 @@
 CREATE TABLE ideas
 (
-  id    int NOT NULL,
+  id BIGSERIAL
+    constraint user_pk
+    primary key,
   title text,
-  body  text,
-  PRIMARY KEY (id)
+  body  text
 );
