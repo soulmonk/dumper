@@ -8,10 +8,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"soulmonk/dumper/pkg/db"
 	"time"
 )
 
-func setupRouter() *gin.Engine {
+func setupRouter(dao *db.Dao) *gin.Engine {
 	r := gin.New()
 	// Add the sloggin middleware to all routes.
 	// The middleware will log all requests attributes.
@@ -19,17 +20,27 @@ func setupRouter() *gin.Engine {
 	r.Use(gin.Recovery())
 
 	r.GET("/ping", ping)
-	//r.GET("/ideas", getIdeas)
-	//r.POST("/ideas", createIdea)
-	//r.GET("/ideas/:id", getIdea)
+	r.GET("/ideas", getGetIdeasHandler(dao))
+	r.POST("/ideas", getCreateIdeaHandler(dao))
 	return r
 }
 
-func RunServer(ctx context.Context, httpPort string) error {
+func getGetIdeasHandler(dao *db.Dao) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+	}
+}
+func getCreateIdeaHandler(dao *db.Dao) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+	}
+}
+
+func RunServer(ctx context.Context, httpPort string, dao *db.Dao) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	r := setupRouter()
+	r := setupRouter(dao)
 
 	addr := httpPort
 	slog.Debug("listen on", "addr", addr)

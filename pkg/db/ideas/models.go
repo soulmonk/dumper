@@ -9,7 +9,8 @@ import (
 )
 
 type Idea struct {
-	ID    int32
-	Title pgtype.Text
-	Body  pgtype.Text
+	ID        int32
+	Title     pgtype.Text
+	Body      pgtype.Text
+	CreatedAt pgtype.Timestamp
 }

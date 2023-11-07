@@ -7,10 +7,35 @@ package ideas
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createIdea = `-- name: CreateIdea :one
+INSERT INTO "ideas" (title, body, created_at)
+VALUES ($1, $2, now())
+RETURNING id, created_at
+`
+
+type CreateIdeaParams struct {
+	Title pgtype.Text
+	Body  pgtype.Text
+}
+
+type CreateIdeaRow struct {
+	ID        int32
+	CreatedAt pgtype.Timestamp
+}
+
+func (q *Queries) CreateIdea(ctx context.Context, arg CreateIdeaParams) (CreateIdeaRow, error) {
+	row := q.db.QueryRow(ctx, createIdea, arg.Title, arg.Body)
+	var i CreateIdeaRow
+	err := row.Scan(&i.ID, &i.CreatedAt)
+	return i, err
+}
+
 const listIdeas = `-- name: ListIdeas :many
-SELECT id, title, body FROM ideas
+SELECT id, title, body, created_at FROM ideas
 `
 
 func (q *Queries) ListIdeas(ctx context.Context) ([]Idea, error) {
@@ -22,7 +47,12 @@ func (q *Queries) ListIdeas(ctx context.Context) ([]Idea, error) {
 	var items []Idea
 	for rows.Next() {
 		var i Idea
-		if err := rows.Scan(&i.ID, &i.Title, &i.Body); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Body,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
