@@ -11,8 +11,11 @@ import (
 )
 
 type Querier interface {
+	CountActiveIdeas(ctx context.Context) (int64, error)
 	CreateIdea(ctx context.Context, arg CreateIdeaParams) (CreateIdeaRow, error)
 	DoneIdea(ctx context.Context, id int64) (pgtype.Timestamp, error)
+	GetIdea(ctx context.Context, id int64) (Ideas, error)
+	GetIdsOfActiveIdeas(ctx context.Context) ([]int64, error)
 	ListIdeas(ctx context.Context) ([]Ideas, error)
 }
 

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	sloggin "github.com/samber/slog-gin"
 	"log/slog"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
@@ -23,10 +24,23 @@ func setupRouter(querier ideas.Querier) *gin.Engine {
 	r.GET("/ping", ping)
 
 	r.GET("/ideas", getGetIdeasHandler(querier))
+	r.GET("/ideas/random", getRandomIdeasHandler(querier))
 	r.POST("/ideas", getCreateIdeaHandler(querier))
 	r.POST("/ideas/:id/done", getDoneIdeaHandler(querier))
 
 	return r
+}
+
+func getRandomIdeasHandler(querier ideas.Querier) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ids, err := querier.GetIdsOfActiveIdeas(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		result, err := querier.GetIdea(c, ids[rand.Intn(len(ids))])
+		c.JSON(200, result)
+	}
 }
 
 type IdeaId struct {
