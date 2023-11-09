@@ -34,8 +34,20 @@ func (q *Queries) CreateIdea(ctx context.Context, arg CreateIdeaParams) (CreateI
 	return i, err
 }
 
+const doneIdea = `-- name: DoneIdea :one
+UPDATE "ideas" SET done_at = now() WHERE id = $1 AND done_at IS NULL
+RETURNING done_at
+`
+
+func (q *Queries) DoneIdea(ctx context.Context, id int64) (pgtype.Timestamp, error) {
+	row := q.db.QueryRow(ctx, doneIdea, id)
+	var done_at pgtype.Timestamp
+	err := row.Scan(&done_at)
+	return done_at, err
+}
+
 const listIdeas = `-- name: ListIdeas :many
-SELECT id, title, body, created_at, done_at FROM ideas
+SELECT id, title, body, created_at, done_at FROM ideas ORDER BY created_at DESC
 `
 
 func (q *Queries) ListIdeas(ctx context.Context) ([]Ideas, error) {

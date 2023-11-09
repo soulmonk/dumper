@@ -6,10 +6,13 @@ package ideas
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
 	CreateIdea(ctx context.Context, arg CreateIdeaParams) (CreateIdeaRow, error)
+	DoneIdea(ctx context.Context, id int64) (pgtype.Timestamp, error)
 	ListIdeas(ctx context.Context) ([]Ideas, error)
 }
 

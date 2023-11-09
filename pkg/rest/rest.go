@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func setupRouter(dao *db.Dao) *gin.Engine {
+func setupRouter(querier ideas.Querier) *gin.Engine {
 	r := gin.New()
 	// Add the sloggin middleware to all routes.
 	// The middleware will log all requests attributes.
@@ -21,30 +21,57 @@ func setupRouter(dao *db.Dao) *gin.Engine {
 	r.Use(gin.Recovery())
 
 	r.GET("/ping", ping)
-	r.GET("/ideas", getGetIdeasHandler(dao))
-	r.POST("/ideas", getCreateIdeaHandler(dao))
+
+	r.GET("/ideas", getGetIdeasHandler(querier))
+	r.POST("/ideas", getCreateIdeaHandler(querier))
+	r.POST("/ideas/:id/done", getDoneIdeaHandler(querier))
+
 	return r
 }
 
-func getGetIdeasHandler(dao *db.Dao) gin.HandlerFunc {
+type IdeaId struct {
+	ID int64 `uri:"id" binding:"required"`
+}
+
+func getDoneIdeaHandler(querier ideas.Querier) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		result, err := dao.IdeasQuerier.ListIdeas(c)
+		var idea IdeaId
+		if err := c.ShouldBindUri(&idea); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		result, err := querier.DoneIdea(c, idea.ID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 		c.JSON(200, result)
 	}
 }
-func getCreateIdeaHandler(dao *db.Dao) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var idea ideas.CreateIdeaParams
-		if err := c.Bind(&idea); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		}
 
-		result, err := dao.IdeasQuerier.CreateIdea(c, idea)
+func getGetIdeasHandler(querier ideas.Querier) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		result, err := querier.ListIdeas(c)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, result)
+	}
+}
+func getCreateIdeaHandler(querier ideas.Querier) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var idea ideas.CreateIdeaParams
+		if err := c.ShouldBindJSON(&idea); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		result, err := querier.CreateIdea(c, idea)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 		c.JSON(200, result)
 	}
@@ -54,7 +81,7 @@ func RunServer(ctx context.Context, httpPort string, dao *db.Dao) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	r := setupRouter(dao)
+	r := setupRouter(dao.IdeasQuerier)
 
 	addr := httpPort
 	slog.Debug("listen on", "addr", addr)
