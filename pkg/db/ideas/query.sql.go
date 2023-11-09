@@ -18,13 +18,13 @@ RETURNING id, created_at
 `
 
 type CreateIdeaParams struct {
-	Title pgtype.Text
-	Body  pgtype.Text
+	Title pgtype.Text `json:"title"`
+	Body  pgtype.Text `json:"body"`
 }
 
 type CreateIdeaRow struct {
-	ID        int64
-	CreatedAt pgtype.Timestamp
+	ID        int64            `json:"id"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
 func (q *Queries) CreateIdea(ctx context.Context, arg CreateIdeaParams) (CreateIdeaRow, error) {
@@ -38,15 +38,15 @@ const listIdeas = `-- name: ListIdeas :many
 SELECT id, title, body, created_at, done_at FROM ideas
 `
 
-func (q *Queries) ListIdeas(ctx context.Context) ([]Idea, error) {
+func (q *Queries) ListIdeas(ctx context.Context) ([]Ideas, error) {
 	rows, err := q.db.Query(ctx, listIdeas)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Idea
+	var items []Ideas
 	for rows.Next() {
-		var i Idea
+		var i Ideas
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,

@@ -8,10 +8,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Idea struct {
-	ID        int64
-	Title     pgtype.Text
-	Body      pgtype.Text
-	CreatedAt pgtype.Timestamp
-	DoneAt    pgtype.Timestamp
+type Ideas struct {
+	ID        int64            `json:"id"`
+	Title     pgtype.Text      `json:"title"`
+	Body      pgtype.Text      `json:"body"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
+	DoneAt    pgtype.Timestamp `json:"done_at"`
 }

@@ -10,7 +10,7 @@ import (
 type Dao struct {
 	conn         *pgx.Conn
 	ctx          context.Context
-	IdeasQuerier *ideas.Queries
+	IdeasQuerier ideas.Querier
 }
 
 func InitConnection(ctx context.Context, connectionString string) *pgx.Conn {
