@@ -9,8 +9,9 @@ import (
 )
 
 type Idea struct {
-	ID        int32
+	ID        int64
 	Title     pgtype.Text
 	Body      pgtype.Text
 	CreatedAt pgtype.Timestamp
+	DoneAt    pgtype.Timestamp
 }

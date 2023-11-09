@@ -23,7 +23,7 @@ type CreateIdeaParams struct {
 }
 
 type CreateIdeaRow struct {
-	ID        int32
+	ID        int64
 	CreatedAt pgtype.Timestamp
 }
 
@@ -35,7 +35,7 @@ func (q *Queries) CreateIdea(ctx context.Context, arg CreateIdeaParams) (CreateI
 }
 
 const listIdeas = `-- name: ListIdeas :many
-SELECT id, title, body, created_at FROM ideas
+SELECT id, title, body, created_at, done_at FROM ideas
 `
 
 func (q *Queries) ListIdeas(ctx context.Context) ([]Idea, error) {
@@ -52,6 +52,7 @@ func (q *Queries) ListIdeas(ctx context.Context) ([]Idea, error) {
 			&i.Title,
 			&i.Body,
 			&i.CreatedAt,
+			&i.DoneAt,
 		); err != nil {
 			return nil, err
 		}
