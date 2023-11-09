@@ -1,0 +1,3 @@
+[submodule "cuppa-tools"]
+	path = cuppa-tools
+	url = git@github.com:soulmonk/cuppa-tools.git
