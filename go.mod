@@ -3,6 +3,7 @@ module soulmonk/dumper
 go 1.21
 
 require (
+	github.com/a-h/templ v0.2.543
 	github.com/gin-gonic/gin v1.9.1
 	github.com/jackc/pgx/v5 v5.4.3
 	github.com/joho/godotenv v1.5.1

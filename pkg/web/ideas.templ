@@ -1,0 +1,14 @@
+package web
+
+import "soulmonk/dumper/pkg/db/ideas"
+
+templ IdeasList(result []ideas.Ideas) {
+  <div data-testid="ideasList">
+  		for _, i := range result {
+  			<div data-testid="ideasListIdea">
+  				<div data-testid="ideasListIdeaTitle">{ i.Title.String }</div>
+  				<div data-testid="ideasListIdeaBody">{ i.Body.String }</div>
+  			</div>
+  		}
+  	</div>
+}

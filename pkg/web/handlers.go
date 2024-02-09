@@ -1,27 +1,34 @@
-package rest
+package web
 
 import (
-	"context"
+	"github.com/a-h/templ"
 	"github.com/gin-gonic/gin"
 	sloggin "github.com/samber/slog-gin"
 	"log/slog"
 	"math/rand"
 	"net/http"
-	"os"
-	"os/signal"
-	"soulmonk/dumper/pkg/db"
 	"soulmonk/dumper/pkg/db/ideas"
-	"time"
+	"strings"
 )
 
 func setupRouter(querier ideas.Querier) *gin.Engine {
 	r := gin.New()
+	// enable templ engine for gin
+	r.HTMLRender = Default
 	// Add the sloggin middleware to all routes.
 	// The middleware will log all requests attributes.
 	r.Use(sloggin.New(slog.Default()))
 	r.Use(gin.Recovery())
 
-	r.GET("/ping", ping)
+	r.GET("/", func(c *gin.Context) {
+		//data := gin.H{
+		//	"name": "Hello, World!",
+		//}
+		//sendResponse(c, http.StatusOK, data, web.Hello)
+		c.HTML(http.StatusOK, "index.html", Hello("Test me"))
+	})
+
+	r.GET("/api/ping", ping)
 
 	r.GET("/ideas", getGetIdeasHandler(querier))
 	r.GET("/ideas/random", getRandomIdeasHandler(querier))
@@ -39,7 +46,7 @@ func getRandomIdeasHandler(querier ideas.Querier) gin.HandlerFunc {
 			return
 		}
 		result, err := querier.GetIdea(c, ids[rand.Intn(len(ids))])
-		c.JSON(200, result)
+		c.JSON(http.StatusOK, result)
 	}
 }
 
@@ -60,8 +67,24 @@ func getDoneIdeaHandler(querier ideas.Querier) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(200, result)
+		c.JSON(http.StatusOK, result)
 	}
+}
+
+func sendResponse(c *gin.Context, code int, result map[string]any, component func(data map[string]any) templ.Component) {
+	accept := c.GetHeader("Accept")
+	if accept == "application/json" {
+		c.JSON(code, result)
+		return
+	} else if accept == "text/html" {
+		c.HTML(code, "", component(result))
+		return
+	}
+}
+
+func isHtmlResponse(c *gin.Context) bool {
+	accept := c.GetHeader("Accept")
+	return strings.Contains(accept, "text/html")
 }
 
 func getGetIdeasHandler(querier ideas.Querier) gin.HandlerFunc {
@@ -71,7 +94,11 @@ func getGetIdeasHandler(querier ideas.Querier) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(200, result)
+		if isHtmlResponse(c) {
+			c.HTML(http.StatusOK, "", IdeasList(result))
+			return
+		}
+		c.JSON(http.StatusOK, result)
 	}
 }
 func getCreateIdeaHandler(querier ideas.Querier) gin.HandlerFunc {
@@ -87,41 +114,8 @@ func getCreateIdeaHandler(querier ideas.Querier) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(200, result)
+		c.JSON(http.StatusOK, result)
 	}
-}
-
-func RunServer(ctx context.Context, httpPort string, dao *db.Dao) error {
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	r := setupRouter(dao.IdeasQuerier)
-
-	addr := httpPort
-	slog.Debug("listen on", "addr", addr)
-	srv := &http.Server{
-		Addr:    ":" + httpPort,
-		Handler: r,
-	}
-
-	// graceful shutdown
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		for range c {
-			// sig is a ^C, handle it
-			slog.Warn("shutting down HTTP/REST gateway...")
-			_, cancel := context.WithTimeout(ctx, 5*time.Second)
-			defer cancel()
-
-			_ = srv.Shutdown(ctx)
-			<-ctx.Done()
-		}
-
-	}()
-
-	slog.Info("starting HTTP/REST gateway...")
-	return srv.ListenAndServe()
 }
 
 type pingResponse struct {
