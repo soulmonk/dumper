@@ -1,4 +1,4 @@
-package rest
+package web
 
 import (
 	"bytes"
@@ -72,7 +72,7 @@ func (q IdeasQuerierMock) CountActiveIdeas(_ context.Context) (int64, error) {
 func TestPing(t *testing.T) {
 	router := setupRouter(defaultIdeasMock())
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest(http.MethodGet, "/ping", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/api/ping", nil)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)

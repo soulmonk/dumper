@@ -7,7 +7,7 @@ import (
 	"os"
 	"soulmonk/dumper/pkg/config"
 	"soulmonk/dumper/pkg/db"
-	"soulmonk/dumper/pkg/rest"
+	"soulmonk/dumper/pkg/web"
 )
 
 func RunServer() error {
@@ -30,5 +30,5 @@ func RunServer() error {
 		}
 	}()
 
-	return rest.RunServer(ctx, cfg.HTTPPort, dao)
+	return web.RunServer(ctx, cfg.HTTPPort, dao)
 }
