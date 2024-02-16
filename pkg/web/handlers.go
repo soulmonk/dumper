@@ -1,6 +1,7 @@
 package web
 
 import (
+	"embed"
 	"github.com/a-h/templ"
 	"github.com/gin-gonic/gin"
 	sloggin "github.com/samber/slog-gin"
@@ -10,6 +11,9 @@ import (
 	"soulmonk/dumper/pkg/db/ideas"
 	"strings"
 )
+
+//go:embed assets/*
+var f embed.FS
 
 func setupRouter(querier ideas.Querier) *gin.Engine {
 	r := gin.New()
@@ -21,11 +25,11 @@ func setupRouter(querier ideas.Querier) *gin.Engine {
 	r.Use(gin.Recovery())
 
 	r.GET("/", func(c *gin.Context) {
-		//data := gin.H{
+		//testIdeas := gin.H{
 		//	"name": "Hello, World!",
 		//}
-		//sendResponse(c, http.StatusOK, data, web.Hello)
-		c.HTML(http.StatusOK, "index.html", Hello("Test me"))
+		//sendResponse(c, http.StatusOK, testIdeas, web.Hello)
+		c.HTML(http.StatusOK, "index.html", Main("Tes"))
 	})
 
 	r.GET("/api/ping", ping)
@@ -35,6 +39,14 @@ func setupRouter(querier ideas.Querier) *gin.Engine {
 	r.POST("/ideas", getCreateIdeaHandler(querier))
 	r.POST("/ideas/:id/done", getDoneIdeaHandler(querier))
 
+	r.GET("/favicon.ico", func(c *gin.Context) {
+		file, _ := f.ReadFile("assets/favicon.ico")
+		c.Data(
+			http.StatusOK,
+			"image/x-icon",
+			file,
+		)
+	})
 	return r
 }
 
@@ -87,6 +99,11 @@ func isHtmlResponse(c *gin.Context) bool {
 	return strings.Contains(accept, "text/html")
 }
 
+func isHasHXTarget(c *gin.Context) bool {
+	target := c.GetHeader("HX-Target")
+	return target != ""
+}
+
 func getGetIdeasHandler(querier ideas.Querier) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		result, err := querier.ListIdeas(c)
@@ -95,7 +112,7 @@ func getGetIdeasHandler(querier ideas.Querier) gin.HandlerFunc {
 			return
 		}
 		if isHtmlResponse(c) {
-			c.HTML(http.StatusOK, "", IdeasList(result))
+			c.HTML(http.StatusOK, "", IdeasList(result, isHasHXTarget(c)))
 			return
 		}
 		c.JSON(http.StatusOK, result)

@@ -2,13 +2,33 @@ package web
 
 import "soulmonk/dumper/pkg/db/ideas"
 
-templ IdeasList(result []ideas.Ideas) {
+templ ideasList(result []ideas.Ideas) {
   <div data-testid="ideasList">
-  		for _, i := range result {
-  			<div data-testid="ideasListIdea">
-  				<div data-testid="ideasListIdeaTitle">{ i.Title.String }</div>
-  				<div data-testid="ideasListIdeaBody">{ i.Body.String }</div>
-  			</div>
-  		}
-  	</div>
+    for _, i := range result {
+      <div data-testid="ideasListIdea">
+        <div data-testid="ideasListIdeaTitle">{ i.Title.String }</div>
+        <div data-testid="ideasListIdeaBody">{ i.Body.String }</div>
+      </div>
+    }
+  </div>
+}
+
+templ IdeasList(result []ideas.Ideas, hasTarget bool) {
+  if hasTarget {
+    @ideasList(result)
+  } else {
+    @Page() {
+      @ideasList(result)
+    }
+	}
+}
+
+templ IdeasCreate() {
+	<div data-testid="ideasCreate">
+		<form data-testid="ideasCreateForm" action="/ideas" method="post">
+			<input data-testid="ideasCreateFormTitle" type="text" name="title"/>
+			<textarea data-testid="ideasCreateFormBody" name="body"></textarea>
+			<button data-testid="ideasCreateFormSubmit" type="submit">Create</button>
+		</form>
+	</div>
 }

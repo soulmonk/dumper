@@ -1,0 +1,86 @@
+package web
+
+templ Layout(contents templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<title>Welcome to dumper</title>
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"/>
+			<script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+		</head>
+		<body>
+			<nav class="navbar navbar-expand-lg navbar-light bg-light">
+				<a class="navbar-brand" href="/">Dumper</a>
+				<div class="collapse navbar-collapse" id="navbarNav">
+					<ul class="navbar-nav">
+						<li class="nav-item">
+							<a class="nav-link" href="/ideas" hx-headers='{"Accept": "text/html"}'>Ideas</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+			<div>Layout vs Wrapping</div>
+			<div id="container" class="container">
+				@contents
+			</div>
+		</body>
+	</html>
+}
+
+templ Page() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<title>Welcome to dumper</title>
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"/>
+			<script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+		</head>
+		<body>
+			<nav data-testid="nav-bar" class="navbar navbar-expand-lg navbar-light bg-light">
+				<a class="navbar-brand" href="/">Dumper</a>
+				<div class="collapse navbar-collapse" id="navbarNav">
+					<ul class="navbar-nav">
+						<li class="nav-item">
+							<a class="nav-link" href="/ideas" hx-headers='{"Accept": "text/html"}'>Ideas</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+			<div id="container" data-testid="container" class="container">
+				{ children... }
+			</div>
+		</body>
+	</html>
+}
+
+templ Page2() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<title>Welcome to dumper</title>
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"/>
+			<script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+		</head>
+		<body>
+			<nav class="navbar navbar-expand-lg navbar-light bg-light">
+				<a class="navbar-brand" href="/">Dumper</a>
+				<div class="collapse navbar-collapse" id="navbarNav">
+					<ul class="navbar-nav">
+						<li class="nav-item">
+							<a class="nav-link" href="/ideas"  hx-get="/ideas" hx-headers='{"Accept": "text/html"}' hx-target="#container">Ideas</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+			<div>v2</div>
+			<div>Now there now url overwrite</div>
+			<div>Is there better way?</div>
+			<div id="container" class="container">
+				{ children... }
+			</div>
+		</body>
+	</html>
+}

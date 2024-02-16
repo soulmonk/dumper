@@ -1,5 +1,7 @@
 package web
 
-templ Hello(name string) {
-	<div>Hello, { name }</div>
+templ Main(name string) {
+	@Page2() {
+	  <h1>Hello, { name }!</h1>
+	}
 }
