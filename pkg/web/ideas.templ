@@ -3,12 +3,26 @@ package web
 import "soulmonk/dumper/pkg/db/ideas"
 
 templ ideasList(result []ideas.Ideas) {
-  <div data-testid="ideasList">
+  <div data-testid="ideasList" class="container">
     for _, i := range result {
-      <div data-testid="ideasListIdea">
-        <div data-testid="ideasListIdeaTitle">{ i.Title.String }</div>
-        <div data-testid="ideasListIdeaBody">{ i.Body.String }</div>
+     <div data-testid="ideasListIdea" class="card">
+      <div data-testid="ideasListIdeaTitle" class="card-header">
+        <h5 class="card-title">Title</h5>
+        { i.Title.String }
       </div>
+      <div data-testid="ideasListIdeaBody" class="card-body">
+        <h6 class="card-subtitle mb-2 text-muted">Body</h6>
+        { i.Body.String }
+      </div>
+      <div data-testid="ideasListIdeaDoneAt" class="card-footer text-muted">
+        <small class="text-muted">Done At</small>
+        { formatTimestamp(i.DoneAt) }
+      </div>
+      <div data-testid="ideasListIdeaCreatedAt" class="card-footer text-muted">
+        <small class="text-muted">Created At</small>
+        { formatTimestamp(i.CreatedAt) }
+      </div>
+    </div>
     }
   </div>
 }
@@ -23,12 +37,34 @@ templ IdeasList(result []ideas.Ideas, hasTarget bool) {
 	}
 }
 
-templ IdeasCreate() {
-	<div data-testid="ideasCreate">
-		<form data-testid="ideasCreateForm" action="/ideas" method="post">
-			<input data-testid="ideasCreateFormTitle" type="text" name="title"/>
-			<textarea data-testid="ideasCreateFormBody" name="body"></textarea>
-			<button data-testid="ideasCreateFormSubmit" type="submit">Create</button>
-		</form>
-	</div>
+templ IdeasCreate(form IdeaForm, hasTarget bool) {
+  if hasTarget {
+    @ideasCreate(form)
+  } else {
+    @Page() {
+      @ideasCreate(form)
+    }
+	}
+}
+
+templ ideasCreate(form IdeaForm) {
+<div data-testid="ideasCreate" class="container">
+ <form data-testid="ideasCreateForm" hx-ext="json-enc" hx-post="/ideas" hx-trigger="submit" class="needs-validation" novalidate>
+  <div class="mb-3">
+   <label for="title" class="form-label">Title</label>
+   <input data-testid="ideasCreateFormTitle" type="text" class="form-control" id="title" name="title" required />
+   <div class="invalid-feedback">
+    Please provide a title.
+   </div>
+  </div>
+  <div class="mb-3">
+   <label for="body" class="form-label">Body</label>
+   <textarea data-testid="ideasCreateFormBody" class="form-control" id="body" name="body" required></textarea>
+   <div class="invalid-feedback">
+    Please provide a body.
+   </div>
+  </div>
+  <button data-testid="ideasCreateFormSubmit" type="submit" class="btn btn-primary">Create</button>
+ </form>
+</div>
 }

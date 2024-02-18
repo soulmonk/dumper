@@ -2,6 +2,7 @@ package web
 
 import (
 	"embed"
+	"fmt"
 	"github.com/a-h/templ"
 	"github.com/gin-gonic/gin"
 	sloggin "github.com/samber/slog-gin"
@@ -29,13 +30,15 @@ func setupRouter(querier ideas.Querier) *gin.Engine {
 		//	"name": "Hello, World!",
 		//}
 		//sendResponse(c, http.StatusOK, testIdeas, web.Hello)
-		c.HTML(http.StatusOK, "index.html", Main("Tes"))
+		c.HTML(http.StatusOK, "index.html", Main("WIP"))
 	})
 
 	r.GET("/api/ping", ping)
 
 	r.GET("/ideas", getGetIdeasHandler(querier))
 	r.GET("/ideas/random", getRandomIdeasHandler(querier))
+	r.GET("/ideas/create", getCreateIdeaFormHandler())
+	// TODO add validation for the request
 	r.POST("/ideas", getCreateIdeaHandler(querier))
 	r.POST("/ideas/:id/done", getDoneIdeaHandler(querier))
 
@@ -60,6 +63,11 @@ func getRandomIdeasHandler(querier ideas.Querier) gin.HandlerFunc {
 		result, err := querier.GetIdea(c, ids[rand.Intn(len(ids))])
 		c.JSON(http.StatusOK, result)
 	}
+}
+
+type IdeaForm struct {
+	Error *string
+	Idea  ideas.Ideas
 }
 
 type IdeaId struct {
@@ -118,6 +126,15 @@ func getGetIdeasHandler(querier ideas.Querier) gin.HandlerFunc {
 		c.JSON(http.StatusOK, result)
 	}
 }
+func getCreateIdeaFormHandler() gin.HandlerFunc {
+	form := IdeaForm{
+		Error: nil,
+		Idea:  ideas.Ideas{},
+	}
+	return func(c *gin.Context) {
+		c.HTML(http.StatusOK, "create_idea.html", IdeasCreate(form, isHasHXTarget(c)))
+	}
+}
 func getCreateIdeaHandler(querier ideas.Querier) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var idea ideas.CreateIdeaParams
@@ -125,6 +142,9 @@ func getCreateIdeaHandler(querier ideas.Querier) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		// log incomming idea
+
+		slog.Info("CreateIdea", slog.String("idea", fmt.Sprintf("%+v", idea)))
 
 		result, err := querier.CreateIdea(c, idea)
 		if err != nil {
