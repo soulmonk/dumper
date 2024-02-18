@@ -40,7 +40,7 @@ func setupRouter(querier ideas.Querier) *gin.Engine {
 	r.GET("/ideas/create", getCreateIdeaFormHandler())
 	// TODO add validation for the request
 	r.POST("/ideas", getCreateIdeaHandler(querier))
-	r.POST("/ideas/:id/done", getDoneIdeaHandler(querier))
+	r.PUT("/ideas/:id/done", getDoneIdeaHandler(querier))
 
 	r.GET("/favicon.ico", func(c *gin.Context) {
 		file, _ := f.ReadFile("assets/favicon.ico")
@@ -85,6 +85,11 @@ func getDoneIdeaHandler(querier ideas.Querier) gin.HandlerFunc {
 		result, err := querier.DoneIdea(c, idea.ID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if isHtmlResponse(c) {
+			// TODO panic: renderer does not like pure text
+			c.HTML(http.StatusOK, "", pure(formatTimestamp(result)))
 			return
 		}
 		c.JSON(http.StatusOK, result)
