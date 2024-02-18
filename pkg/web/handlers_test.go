@@ -115,7 +115,7 @@ func TestDoneIdea(t *testing.T) {
 	}
 	w = httptest.NewRecorder()
 	url := "/ideas/" + strconv.FormatInt(createResponse.ID, 10) + "/done"
-	req, _ = http.NewRequest(http.MethodPost, url, nil)
+	req, _ = http.NewRequest(http.MethodPut, url, nil)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code, w.Body.String())
@@ -126,7 +126,7 @@ func TestDoneSameIdeaTwice(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	url := "/ideas/" + strconv.FormatInt(1, 10) + "/done"
-	req, _ := http.NewRequest(http.MethodPost, url, nil)
+	req, _ := http.NewRequest(http.MethodPut, url, nil)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code, w.Body.String())
@@ -137,7 +137,7 @@ func TestDoneSameIdeaTwiceNotFound(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	url := "/ideas/1/done"
-	req, _ := http.NewRequest(http.MethodPost, url, nil)
+	req, _ := http.NewRequest(http.MethodPut, url, nil)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code, w.Body.String())
 }
