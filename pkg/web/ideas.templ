@@ -33,6 +33,16 @@ templ idea(idea ideas.Ideas) {
   </div>
 }
 
+templ Idea(result ideas.Ideas, hasTarget bool) {
+  if hasTarget {
+     @idea(result)
+  } else {
+    @Page() {
+       @idea(result)
+    }
+	}
+}
+
 templ ideasList(result []ideas.Ideas) {
   <div data-testid="ideasList" class="container">
     for _, i := range result {

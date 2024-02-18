@@ -61,6 +61,10 @@ func getRandomIdeasHandler(querier ideas.Querier) gin.HandlerFunc {
 			return
 		}
 		result, err := querier.GetIdea(c, ids[rand.Intn(len(ids))])
+		if isHtmlResponse(c) {
+			c.HTML(http.StatusOK, "", Idea(result, isHasHXTarget(c)))
+			return
+		}
 		c.JSON(http.StatusOK, result)
 	}
 }
