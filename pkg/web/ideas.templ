@@ -2,27 +2,31 @@ package web
 
 import "soulmonk/dumper/pkg/db/ideas"
 
+templ idea(idea ideas.Ideas) {
+  <div data-testid="ideasListIdea" class="card">
+    <div data-testid="ideasListIdeaTitle" class="card-header">
+      <h5 class="card-title">Title</h5>
+      { idea.Title.String }
+    </div>
+    <div data-testid="ideasListIdeaBody" class="card-body">
+      <h6 class="card-subtitle mb-2 text-muted">Body</h6>
+      { idea.Body.String }
+    </div>
+    <div data-testid="ideasListIdeaDoneAt" class="card-footer text-muted">
+      <small class="text-muted">Done At</small>
+      { formatTimestamp(idea.DoneAt) }
+    </div>
+    <div data-testid="ideasListIdeaCreatedAt" class="card-footer text-muted">
+      <small class="text-muted">Created At</small>
+      { formatTimestamp(idea.CreatedAt) }
+    </div>
+  </div>
+}
+
 templ ideasList(result []ideas.Ideas) {
   <div data-testid="ideasList" class="container">
     for _, i := range result {
-     <div data-testid="ideasListIdea" class="card">
-      <div data-testid="ideasListIdeaTitle" class="card-header">
-        <h5 class="card-title">Title</h5>
-        { i.Title.String }
-      </div>
-      <div data-testid="ideasListIdeaBody" class="card-body">
-        <h6 class="card-subtitle mb-2 text-muted">Body</h6>
-        { i.Body.String }
-      </div>
-      <div data-testid="ideasListIdeaDoneAt" class="card-footer text-muted">
-        <small class="text-muted">Done At</small>
-        { formatTimestamp(i.DoneAt) }
-      </div>
-      <div data-testid="ideasListIdeaCreatedAt" class="card-footer text-muted">
-        <small class="text-muted">Created At</small>
-        { formatTimestamp(i.CreatedAt) }
-      </div>
-    </div>
+      @idea(i)
     }
   </div>
 }
