@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
-	"soulmonk/dumper/pkg/db"
 	"soulmonk/dumper/pkg/db/ideas"
 	"strconv"
 	"testing"
@@ -20,6 +19,9 @@ type IdeasQuerierMock struct {
 	lastId int64
 	doneId int64
 }
+
+// TODO maybe add some kind of map?
+// TODO better way for testing?
 
 func defaultIdeasMock() IdeasQuerierMock {
 	return IdeasQuerierMock{1, 2}
@@ -120,28 +122,11 @@ func TestDoneIdea(t *testing.T) {
 }
 
 func TestDoneSameIdeaTwice(t *testing.T) {
-	dao := db.GetDao(context.TODO(), "postgres://cuppa:toor@localhost:5432/cuppa-dumper-test")
-	router := setupRouter(dao.IdeasQuerier)
+	router := setupRouter(IdeasQuerierMock{1, 1})
+
 	w := httptest.NewRecorder()
-	jsonBody := `{"title":"Title","body":"Body"}`
-	req, _ := http.NewRequest(http.MethodPost, "/ideas", bytes.NewBuffer([]byte(jsonBody)))
-	req.Header.Set("Content-Type", "application/json")
-	router.ServeHTTP(w, req)
-
-	var createResponse ideas.CreateIdeaRow
-	if err := json.Unmarshal(w.Body.Bytes(), &createResponse); err != nil {
-		t.Errorf("can't decode response, %s", w.Body.String())
-		return
-	}
-	w = httptest.NewRecorder()
-	url := "/ideas/" + strconv.FormatInt(createResponse.ID, 10) + "/done"
-	req, _ = http.NewRequest(http.MethodPost, url, nil)
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code, w.Body.String())
-
-	w = httptest.NewRecorder()
-	req, _ = http.NewRequest(http.MethodPost, url, nil)
+	url := "/ideas/" + strconv.FormatInt(1, 10) + "/done"
+	req, _ := http.NewRequest(http.MethodPost, url, nil)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code, w.Body.String())
