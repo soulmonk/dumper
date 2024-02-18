@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
-	"soulmonk/dumper/pkg/db"
 	"soulmonk/dumper/pkg/db/ideas"
 	"strconv"
 	"testing"
@@ -120,8 +119,7 @@ func TestDoneIdea(t *testing.T) {
 }
 
 func TestDoneSameIdeaTwice(t *testing.T) {
-	dao := db.GetDao(context.TODO(), "postgres://cuppa:toor@localhost:5432/cuppa-dumper-test")
-	router := setupRouter(dao.IdeasQuerier)
+	router := setupRouter(defaultIdeasMock())
 	w := httptest.NewRecorder()
 	jsonBody := `{"title":"Title","body":"Body"}`
 	req, _ := http.NewRequest(http.MethodPost, "/ideas", bytes.NewBuffer([]byte(jsonBody)))
