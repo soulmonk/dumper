@@ -18,6 +18,10 @@ jobs:
       with:
         go-version: ^1.21
 
+    - name: Install dependencies
+      run: |
+        go install github.com/a-h/templ/cmd/templ@v0.2.543
+
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
       with:
