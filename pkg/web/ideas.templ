@@ -5,11 +5,9 @@ import "soulmonk/dumper/pkg/db/ideas"
 templ idea(idea ideas.Ideas) {
   <div data-testid="ideasListIdea" class="card">
     <div data-testid="ideasListIdeaTitle" class="card-header">
-      <h5 class="card-title">Title</h5>
       { idea.Title.String }
     </div>
     <div data-testid="ideasListIdeaBody" class="card-body">
-      <h6 class="card-subtitle mb-2 text-muted">Body</h6>
       { idea.Body.String }
     </div>
     <div data-testid="ideasListIdeaDoneAt" class="card-footer text-muted">

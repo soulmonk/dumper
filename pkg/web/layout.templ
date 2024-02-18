@@ -41,7 +41,7 @@ templ head() {
 }
 
 templ navigation() {
-  <nav class="navbar navbar-expand navbar-light bg-light">
+  <nav data-testid="nav-bar" class="navbar navbar-expand navbar-light bg-light">
     <a class="navbar-brand" href="/">Dumper</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -75,7 +75,7 @@ templ Page() {
 		<body>
 		  @navigation()
 
-			<div id="container" class="container">
+			<div id="container"  data-testid="container" class="container">
 				{ children... }
 			</div>
 
