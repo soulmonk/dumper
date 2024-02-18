@@ -68,11 +68,11 @@ func TestIdeasListWithoutTarget(t *testing.T) {
 	}
 
 	// Expect the container to be rendered.
-	if doc.Find(`[data-testid="container"]`).Length() != 0 {
+	if doc.Find(`[data-testid="container"]`).Length() != 1 {
 		t.Error("expected container to be rendered, but it wasn't")
 	}
 	// Expect the navigation to be rendered.
-	if doc.Find(`[data-testid="nav-bar"]`).Length() != 0 {
+	if doc.Find(`[data-testid="nav-bar"]`).Length() != 1 {
 		t.Error("expected nav to be rendered, but it wasn't")
 	}
 	// Expect both posts to be rendered.
